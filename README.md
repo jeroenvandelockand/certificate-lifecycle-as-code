@@ -152,23 +152,6 @@ make ca wait test
 For a private repository, register repository credentials in Argo CD first.
 Credentials are intentionally outside this repository.
 
-## Push this download to GitHub
-
-```bash
-unzip certificate-lifecycle-as-code.zip
-cd certificate-lifecycle-as-code
-make validate
-make init-git
-git remote add origin git@github.com:jeroenvandelockand/certificate-lifecycle-as-code.git
-git push -u origin main
-```
-
-## Scope
-
-V1 proves the local-CA path end to end. EJBCA via ACME, the EJBCA external
-issuer, trust-manager, OpenShift/ARO and workload hot reload are deliberately
-kept as follow-on profiles. See [the roadmap](docs/roadmap.md).
-
 ## Documentation
 
 - [Architecture](docs/architecture.md)
