@@ -1,0 +1,8 @@
+global:
+  repoURL: https://github.com/jeroenvandelockand/certificate-lifecycle-as-code.git
+  targetRevision: main
+versions:
+  certManager: v1.21.2
+  approverPolicy: v0.27.0
+images:
+  demoApp: nginxinc/nginx-unprivileged:1.29.1-alpine

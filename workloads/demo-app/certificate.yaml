@@ -1,0 +1,25 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: demo-app
+  namespace: demo-app
+  labels:
+    app.kubernetes.io/name: demo-app
+    app.kubernetes.io/part-of: certificate-lifecycle-as-code
+spec:
+  secretName: demo-app-tls
+  issuerRef:
+    name: demo-ca
+    kind: ClusterIssuer
+    group: cert-manager.io
+  dnsNames:
+    - demo.apps.demo.internal
+  usages:
+    - server auth
+  privateKey:
+    algorithm: RSA
+    size: 2048
+    rotationPolicy: Always
+  duration: 1h
+  renewBeforePercentage: 90
+

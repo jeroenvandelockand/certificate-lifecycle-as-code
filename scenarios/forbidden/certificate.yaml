@@ -1,0 +1,24 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: forbidden-certificate
+  namespace: demo-app
+  labels:
+    app.kubernetes.io/part-of: certificate-lifecycle-as-code
+    clac.demo/scenario: forbidden
+spec:
+  secretName: forbidden-tls
+  issuerRef:
+    name: demo-ca
+    kind: ClusterIssuer
+    group: cert-manager.io
+  dnsNames:
+    - banking.example.com
+  usages:
+    - server auth
+  privateKey:
+    algorithm: RSA
+    size: 2048
+    rotationPolicy: Always
+  duration: 2h
+

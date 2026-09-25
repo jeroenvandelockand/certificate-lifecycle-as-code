@@ -1,0 +1,140 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cert-manager
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://charts.jetstack.io
+    chart: cert-manager
+    targetRevision: {{ .Values.versions.certManager | quote }}
+    helm:
+      releaseName: cert-manager
+      valuesObject:
+        crds:
+          enabled: true
+        disableAutoApproval: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cert-manager
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: approver-policy
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://charts.jetstack.io
+    chart: cert-manager-approver-policy
+    targetRevision: {{ .Values.versions.approverPolicy | quote }}
+    helm:
+      releaseName: cert-manager-approver-policy
+      valuesObject:
+        app:
+          approveSignerNames:
+            - issuers.cert-manager.io/*
+            - clusterissuers.cert-manager.io/*
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cert-manager
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: platform-pki
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: {{ .Values.global.repoURL | quote }}
+    targetRevision: {{ .Values.global.targetRevision | quote }}
+    path: platform/pki
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cert-manager
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: certificate-policy
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "30"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: {{ .Values.global.repoURL | quote }}
+    targetRevision: {{ .Values.global.targetRevision | quote }}
+    path: policies
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cert-manager
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: demo-app
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "40"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: {{ .Values.global.repoURL | quote }}
+    targetRevision: {{ .Values.global.targetRevision | quote }}
+    path: workloads/demo-app
+    kustomize:
+      images:
+        - nginxinc/nginx-unprivileged={{ .Values.images.demoApp }}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: demo-app
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+

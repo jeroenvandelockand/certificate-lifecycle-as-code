@@ -1,0 +1,43 @@
+name: Integration
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  kind:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install pinned tools
+        run: ./scripts/ci-tools.sh
+
+      - name: Validate repository
+        run: make validate
+
+      - name: Build demo
+        run: make demo
+
+      - name: Run fast integration suite
+        run: make test
+
+      - name: Diagnostics
+        if: failure()
+        run: |
+          make status || true
+          kubectl get events -A --sort-by=.lastTimestamp || true
+          kubectl get pods -A -o wide || true
+
+      - name: Clean up
+        if: always()
+        run: make destroy
+

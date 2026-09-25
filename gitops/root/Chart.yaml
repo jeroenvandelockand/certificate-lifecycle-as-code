@@ -1,0 +1,6 @@
+apiVersion: v2
+name: certificate-platform-root
+description: Argo CD app-of-apps for Certificate Lifecycle as Code
+type: application
+version: 0.1.0
+
